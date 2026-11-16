@@ -16,9 +16,9 @@ export function buscarChamadoPorId(req, res) {
 }
 
 export function criarChamado(req, res) {
-  const { titulo, descricao, status } = req.body;
+  const { titulo, descricao, prioridade, status, categoriaId, criadoEm} = req.body;
 
-  if (!titulo || !descricao || !status) {
+  if (!titulo || !descricao || !prioridade || !status || !categoriaId || !criadoEm) {
     return res.status(400).json({ erro: "Campos obrigatórios ausentes" });
   }
 
@@ -26,7 +26,10 @@ export function criarChamado(req, res) {
     id: chamados.length + 1,
     titulo,
     descricao,
+    prioridade,
     status,
+    categoriaId,
+    criadoEm: new Date().toISOString(),
   };
 
   chamados.push(novoChamado);

@@ -1,11 +1,12 @@
-const chamados = [
+export const chamados = [
   {
     id: 1,
     titulo: "Monitor piscando",
+    descricao: "Monitor piscando, preciso de ajuda para resolver o problema",
     prioridade: "media",
     status: "aberto",
     categoriaId: 1,
-    criadoEm: "2023-01-01T00:00:00Z",
+    criadoEm: "2023-05-01T00:00:00Z",
   },
   {
     id: 2,
@@ -14,7 +15,7 @@ const chamados = [
     prioridade: "alta",
     status: "em_andamento",
     categoriaId: 3,
-    criadoEm: "2023-01-01T00:00:00Z",
+    criadoEm: "2023-04-01T00:00:00Z",
   },
   {
     id: 3,
@@ -32,7 +33,7 @@ const chamados = [
     prioridade: "media",
     status: "aberto",
     categoriaId: 2,
-    criadoEm: "2023-01-01T00:00:00Z",
+    criadoEm: "2023-02-01T00:00:00Z",
   },
   {
     id: 5,
@@ -41,6 +42,6 @@ const chamados = [
     prioridade: "baixa",
     status: "resolvido",
     categoriaId: 1,
-    criadoEm: "2023-01-01T00:00:00Z",
+    criadoEm: "2023-03-01T00:00:00Z",
   },
 ];

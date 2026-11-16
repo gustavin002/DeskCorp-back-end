@@ -9,10 +9,10 @@ import {
 
 const router = Router();
 
-router.get("/chamados", listarChamados);
-router.get("/chamados/:id", buscarChamadoPorId);
-router.post("/chamados", criarChamado);
-router.put("/chamados/:id", atualizarChamado);
-router.delete("/chamados/:id", deletarChamado);
+router.get("/", listarChamados);
+router.get("/:id", buscarChamadoPorId);
+router.post("/", criarChamado);
+router.put("/:id", atualizarChamado);
+router.delete("/:id", deletarChamado);
 
 export default router;
