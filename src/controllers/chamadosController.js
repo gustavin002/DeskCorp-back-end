@@ -1,66 +1,89 @@
-import { chamados } from "../data/chamados.js";
-// GET Listar Chamados
-export function listarChamados(req, res) {
+// Controller: as regras de cada operação de chamados. Os dados vêm do banco (Prisma).
+import { prisma } from '../lib/prisma.js';
+
+// GET /api/chamados
+export async function listarChamados(req, res) {
+  const chamados = await prisma.chamado.findMany({ orderBy: { id: 'asc' } });
   res.json(chamados);
 }
 
-export function buscarChamadoPorId(req, res) {
+// GET /api/chamados/:id
+export async function buscarChamadoPorId(req, res) {
   const id = Number(req.params.id);
-  const chamado = chamados.find((c) => c.id === id);
-
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({ erro: 'O id precisa ser um número' });
+  }
+  const chamado = await prisma.chamado.findUnique({ where: { id } });
   if (!chamado) {
-    return res.status(404).json({ erro: "Chamado não encontrado" });
+    return res.status(404).json({ erro: 'Chamado não encontrado' });
   }
-
-  return res.json(chamado);
+  res.json(chamado);
 }
 
-export function criarChamado(req, res) {
-  const { titulo, descricao, prioridade, status, categoriaId, criadoEm} = req.body;
-
-  if (!titulo || !descricao || !prioridade || !status || !categoriaId || !criadoEm) {
-    return res.status(400).json({ erro: "Campos obrigatórios ausentes" });
+// POST /api/chamados
+export async function criarChamado(req, res) {
+  // req.body vem vazio (undefined) se o cliente não enviar JSON; ?? {} evita o erro
+  const { titulo, descricao, prioridade, status, categoriaId } = req.body ?? {};
+  if (!titulo) {
+    return res.status(400).json({ erro: 'O campo titulo é obrigatório' });
   }
-
-  const novoChamado = {
-    id: chamados.length + 1,
-    titulo,
-    descricao,
-    prioridade,
-    status,
-    categoriaId,
-    criadoEm: new Date().toISOString(),
-  };
-
-  chamados.push(novoChamado);
-  return res.status(201).json(novoChamado);
+  if (!categoriaId) {
+    return res.status(400).json({ erro: 'O campo categoriaId é obrigatório' });
+  }
+  const categoria = await prisma.categoria.findUnique({ where: { id: Number(categoriaId) } });
+  if (!categoria) {
+    return res.status(400).json({ erro: 'categoriaId não existe' });
+  }
+  // campos que não chegaram ficam undefined: o banco usa o valor padrão ou deixa vazio
+  const novo = await prisma.chamado.create({
+    data: {
+      titulo,
+      descricao,
+      prioridade,
+      status,
+      categoriaId: categoria.id,
+    },
+  });
+  res.status(201).json(novo);
 }
 
-export function atualizarChamado(req, res) {
+// PUT /api/chamados/:id
+export async function atualizarChamado(req, res) {
   const id = Number(req.params.id);
-  const chamado = chamados.find((c) => c.id === id);
-
-  if (!chamado) {
-    return res.status(404).json({ erro: "Chamado não encontrado" });
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({ erro: 'O id precisa ser um número' });
   }
-
-  const { titulo, descricao, status } = req.body;
-
-  if (titulo) chamado.titulo = titulo;
-  if (descricao) chamado.descricao = descricao;
-  if (status) chamado.status = status;
-
-  return res.json(chamado);
+  const existe = await prisma.chamado.findUnique({ where: { id } });
+  if (!existe) {
+    return res.status(404).json({ erro: 'Chamado não encontrado' });
+  }
+  const dados = req.body ?? {};
+  if (dados.titulo === '') {
+    return res.status(400).json({ erro: 'O campo titulo não pode ficar vazio' });
+  }
+  // campos que não chegaram ficam undefined, e o Prisma não os altera
+  const atualizado = await prisma.chamado.update({
+    where: { id },
+    data: {
+      titulo: dados.titulo,
+      descricao: dados.descricao,
+      prioridade: dados.prioridade,
+      status: dados.status,
+    },
+  });
+  res.json(atualizado);
 }
 
-export function deletarChamado(req, res) {
+// DELETE /api/chamados/:id
+export async function deletarChamado(req, res) {
   const id = Number(req.params.id);
-  const index = chamados.findIndex((c) => c.id === id);
-
-  if (index === -1) {
-    return res.status(404).json({ erro: "Chamado não encontrado" });
+  if (!Number.isInteger(id)) {
+    return res.status(400).json({ erro: 'O id precisa ser um número' });
   }
-
-  chamados.splice(index, 1);
-  return res.status(204).send();
+  const existe = await prisma.chamado.findUnique({ where: { id } });
+  if (!existe) {
+    return res.status(404).json({ erro: 'Chamado não encontrado' });
+  }
+  await prisma.chamado.delete({ where: { id } });
+  res.status(204).send();
 }
